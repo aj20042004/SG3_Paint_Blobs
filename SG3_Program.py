@@ -4,6 +4,8 @@
 #
 # Python Packages Required:
 # (In Thonny IDE add the following packages under "Tools > Manage Packages")
+#   - tkinter
+#   - matplotlib
 #
 # Authors:
 #   - Zachary Gmyr
