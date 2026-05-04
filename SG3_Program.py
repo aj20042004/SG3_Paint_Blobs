@@ -406,6 +406,7 @@ Experiments:
    a) Change N (grid grows, MaxT fixed) - graph results
    b) Change MaxT (longer runs, N fixed) - graph results
 """)
+<<<<<<< Updated upstream
 
     '''# /-- TESTING START --/
     # testing GetStatistics() function with hard-coded canvas states
@@ -442,6 +443,9 @@ Experiments:
     GetStatistics(canvas, MaxT, 2)
     # /-- TESTING END --/'''
 
+=======
+    
+>>>>>>> Stashed changes
     # ── Simulation 1: fixed 10×10, MaxT=300 ─────────────────
     print("Starting Simulation 1  (10x10, MaxT=300)...\n")
     min_b, avg_b, max_b, canvas1, full1, root1, tkc1, cells1 = \
