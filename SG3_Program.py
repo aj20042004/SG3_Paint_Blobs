@@ -372,6 +372,49 @@ def GetStatistics(canvas, total_blobs, N):
     print(f"  Squares with only one color      = {total_one_color}")
 
     return min_square_blobs, avg_square_blobs, max_square_blobs
+# ---------------------------------------------------------------
+#  GRAPHING FUNCTION — REQUIRED FOR EXPERIMENTS 1 AND 2
+# ---------------------------------------------------------------
+
+def PlotGraph(x_values, min_list, avg_list, max_list, x_label="X", title="Paint Blob Statistics"):
+    """
+    Draws a graph with three point series:
+        • minimum blobs per square
+        • average blobs per square
+        • maximum blobs per square
+
+    Parameters:
+        x_values — list of X‑axis values (N or MaxT depending on experiment)
+        min_list — list of minimum blob counts
+        avg_list — list of average blob counts
+        max_list — list of maximum blob counts
+        x_label  — label for the X axis
+        title    — graph title
+    """
+
+    plt.figure(figsize=(10, 6))
+
+    # Plot each series with distinct markers
+    plt.plot(x_values, min_list, marker="o", linestyle="-", color="blue",  label="Minimum")
+    plt.plot(x_values, avg_list, marker="s", linestyle="-", color="green", label="Average")
+    plt.plot(x_values, max_list, marker="^", linestyle="-", color="red",   label="Maximum")
+
+    # Labels and title
+    plt.xlabel(x_label, fontsize=12)
+    plt.ylabel("Blobs per Square", fontsize=12)
+    plt.title(title, fontsize=14, fontweight="bold")
+
+    # Grid for readability
+    plt.grid(True, linestyle="--", alpha=0.5)
+
+    # Legend
+    plt.legend()
+
+    # Tight layout so labels don't get cut off
+    plt.tight_layout()
+
+    # Display the graph
+    plt.show()
 
 
 # ---------------------------------------------------------------
