@@ -406,46 +406,7 @@ Experiments:
    a) Change N (grid grows, MaxT fixed) - graph results
    b) Change MaxT (longer runs, N fixed) - graph results
 """)
-<<<<<<< Updated upstream
-
-    '''# /-- TESTING START --/
-    # testing GetStatistics() function with hard-coded canvas states
-    # 1. called at first moment all squares have at least one paint blob
-    # 2. called when MaxT blobs have painted (t=MaxT)
-
-    N = 2
-    MaxT = 8
-
-    # System State: first moment all squares have at least one paint blob (let t = 4)
-    canvas = [
-        {"red": 1, "green": 0, "blue": 0, "last": 0},  # square index 0
-        {"red": 0, "green": 0, "blue": 1, "last": 1},  # square index 1
-        {"red": 0, "green": 0, "blue": 1, "last": 1},  # square index 1
-        {"red": 0, "green": 1, "blue": 0, "last": 2},  # square index 1
-        # etc... (we use 2x2 N here)
-    ]
-
-    # N = 2 (2x2), MaxT = 8
-    print("\nFirst moment (t=4) each square has at least ONE paint blob:")
-    GetStatistics(canvas, 4, 2)  # Called as soon as every square is painted once
-
-    # System State: up to MaxT seconds have passed (MaxT blobs painted)
-    canvas = [
-        {"red": 1, "green": 2, "blue": 0, "last": 2},  # square index 0
-        {"red": 0, "green": 0, "blue": 1, "last": 1},  # square index 1
-        {"red": 0, "green": 0, "blue": 2, "last": 1},  # square index 1
-        {"red": 0, "green": 1, "blue": 1, "last": 1},  # square index 1
-        # etc... (we use 2x2 N here)
-    ]
-
-    print(f"\nAfter MaxT (Maxt={MaxT}) seconds have passed:")
-    # N = 2 (2x2), MaxT = 8
-    GetStatistics(canvas, MaxT, 2)
-    # /-- TESTING END --/'''
-
-=======
     
->>>>>>> Stashed changes
     # ── Simulation 1: fixed 10×10, MaxT=300 ─────────────────
     print("Starting Simulation 1  (10x10, MaxT=300)...\n")
     min_b, avg_b, max_b, canvas1, full1, root1, tkc1, cells1 = \
