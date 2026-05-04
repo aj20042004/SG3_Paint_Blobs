@@ -1,59 +1,49 @@
-# SG3 Paint Blobs Group Project
-# Language - Python
-# IDE - Developed in VScode, PyCharm & Thonny
+# ========================================================================================================================
+# SG3: Paint Blobs
+# CS 4500, Spring 2026
+# ========================================================================================================================
 #
-# Python Packages Required:
-# (In Thonny IDE add the following packages under "Tools > Manage Packages")
-#   - tkinter
-#   - matplotlib
+# Programming Language: Python 3
+# IDE: Thonny, VScode and PyCharm
 #
-# Authors:
-#   - Zachary Gmyr
-#   - Mira Ysabela Ifurung
-#   - Daniel McKinnis
-#   - AJ Soma Ravichandran
-#   - Devon Schrader
+# Programmers  : AJ Soma Ravichandran, Daniel McKinnis, Mira Ysabela Ifurung, Devon Schrader, Zachary Gmyr
+# Date Started : April 27, 2026
+# Major Revisions: None
 #
-# Revision History:
+# Description:
+#   This program simulates random paint blobs dropping on an N×N canvas grid.
+#   Each blob is randomly colored red, green, or blue, and lands on a randomly
+#   chosen square each second. The simulation pauses and prints statistics the
+#   first moment every square has been painted (if that occurs before MaxT).
+#   It always prints statistics once MaxT blobs have been dropped. After an
+#   animated 10×10 demo and a user-defined simulation, the user chooses one of
+#   two batch experiments (vary N or vary MaxT), which each run 10 simulations
+#   and display a comparison graph.
 #
+# Central Data Structures:
+#   canvas  — a list of (N*N) dictionaries. Each dictionary represents one
+#             grid square and has these keys:
+#               "red"       : int  — count of red blobs dropped here
+#               "green"     : int  — count of green blobs dropped here
+#               "blue"      : int  — count of blue blobs dropped here
+#               "top_color" : str|None — color of the most-recently dropped blob
+#                             (None if square is unpainted)
 #
-# Course:
-#   CS 4500 - Intro to the Software Profession
+# External Packages Used:
+#   tkinter     — built-in Python GUI toolkit; used to draw and animate the
+#                 paint-blob canvas grid in real time.
+#   matplotlib  — third-party plotting library; used to draw the comparison
+#                 graphs for the two batch experiments.
+#   random      — built-in; used to randomly select grid squares and blob colors.
+#   time        — built-in; used to pace the animation with sleep() delays.
 #
-# Program Explanation:
+# Outside Resources:
+#    - https://docs.python.org/3/library/tkinter.html  (Canvas widget docs)
+#    - https://matplotlib.org/stable/api/pyplot_summary.html#module-matplotlib.pyplot  (pyplot reference)
 #
-#
-# Data Structures:
-#
-#
-# External Files Used:
-#
-#
-# References Used:
-#   - https://jakob-bagterp.github.io/colorist-for-python/ansi-escape-codes/effects/#cheat-sheet (underline text)
+# ========================================================================================================================
 
-# /-- Helper Functions --/
-
-#   DESCRIPTION:
-#       Outputs information about blobs painted to the canvas in the current state, as stored in some data structure
-#       (canvas) containing information on each square in an NxN grid. For each square in this grid, this data structure
-#       should store the number of paint blobs by color (rgb), and the current blob (or last blob painted to this square).
-#       Information displayed to the user includes:
-#           1. total number of paint blobs dropped on the canvas so far
-#           2. lowest, highest, and average # of paint blobs on a given square
-#           3. total number of blobs for each color (rgb)
-#           4. total number of squares painted with just one color
-#       Should be called whenever a simulation ends (MaxT elapsed), or the first moment each square has one paint blob.
-#   GLOBALS USED:
-#       N/a
-#   PARAMETERS:
-#       totalBlobs -> total r+b+g blobs painted across entire canvas, or current time (seconds) in the simulation
-#       (where 1 blob is painted per second). May be some value from NxN to MaxT of the given simulation.
-#       N -> singular dimension of NxN grid used in this simulation.
-#       canvas -> NxN grid storing {"red","green","blue","last"} key-values per square
-#   RETURNS:
-#       N/a
-
+# /-- Imports --/
 import tkinter as tk
 import random
 import time
@@ -66,8 +56,6 @@ Parameters:
 Returns:
     Hex color string (white if None)
 """
-
-
 def GetColorHex(color):
     mapping = {
         "red": "#FF4444",
@@ -86,8 +74,6 @@ Parameters:
 Returns:
 (root, tk_canvas, cell_px, cells_dict)
 """
-
-
 def CreateAnimationWindow(N, title="Paint Blob Simulation"):
     # Scale cell size so the grid fits comfortably on screen (max 600px wide)
     cell_px = max(6, min(60, 600 // N))
@@ -132,8 +118,6 @@ Runs a paint-blob simulation on an NxN grid for MaxT drops.
 Returns:
 (min, avg, max, canvas, full_canvas_done, root, tk_canvas, cells)
 """
-
-
 def RunSimulation(N, MaxT, animate=False):
     colors = ["red", "green", "blue"]
     canvas = []
@@ -221,13 +205,18 @@ function using those lists.
 
 Returns: nothing
 """
-
-
 def RunExperimentChangeN():
+    
     # Prompts user for N, increment of N, & MaxT
     # N = GetValidInteger("Enter grid size N: ")
+    
+    print("\n┌─────────────────────────────────────────────────┐")
+    print("│  Experiment 1: Vary Grid Size N  (MaxT fixed)   │")
+    print("└─────────────────────────────────────────────────┘")
+    
     N = int(input("Enter starting grid size N: "))  # temporary line until GetValidInteger is implemented
     N_increment = GetValidIncrement("Enter valid increment (1, 10, 100, or 1000): ")
+    
     # max_t = GetValidInteger("Enter starting MaxT: ")
     max_t = int(input("Enter MaxT: "))  # temporary line until GetValidInteger is implemented
 
@@ -237,9 +226,11 @@ def RunExperimentChangeN():
     avg_list = []  # averages
     max_list = []  # maximums
 
+    print()
     # Runs simulations 10 times while incrementing N each time
-    for i in range(9):
+    for i in range(10):
         current_N = N + i * N_increment
+        print(f"  [{i+1}/10] Simulating  N={current_N:>5},  MaxT={max_t} ...", end="", flush=True)
         min_b, avg_b, max_b, _, _, _, _, _ = RunSimulation(current_N, max_t, animate=False)
 
         # Appends values from simulation into lists
@@ -247,9 +238,14 @@ def RunExperimentChangeN():
         min_list.append(min_b)
         avg_list.append(avg_b)
         max_list.append(max_b)
+        print(f"  min={min_b}  avg={avg_b:.2f}  max={max_b}")
 
     # Plots the results
-    PlotGraph(N_values, min_list, avg_list, max_list)
+    PlotGraph(
+        N_values, min_list, avg_list, max_list,
+        x_label="Grid Dimension N (squares per side)",
+        title=f"Paint Blob Statistics: Varying N  (MaxT={max_t})"
+    )
 
 
 """
@@ -259,13 +255,17 @@ function using those lists.
 
 Returns: nothing
 """
-
-
 def RunExperimentChangeMaxT():
+    
+    print("\n┌──────────────────────────────────────────────────┐")
+    print("│  Experiment 2: Vary MaxT  (Grid Size N fixed)    │")
+    print("└──────────────────────────────────────────────────┘")
+    
     # Prompts user for MaxT, increment of MaxT, & N
     # max_t = GetValidInteger("Enter starting MaxT: ")
     max_t = int(input("Enter starting MaxT: "))  # temporary line until GetValidInteger is implemented
     t_increment = GetValidIncrement("Enter valid increment (1, 10, 100, or 1000): ")
+    
     # N = GetValidInteger("Enter grid size N: ")
     N = int(input("Enter grid size N: "))  # temporary line until GetValidInteger is implemented
 
@@ -276,8 +276,10 @@ def RunExperimentChangeMaxT():
     max_list = []  # maximums
 
     # Runs simulations 10 times while incrementing MaxT each time
-    for i in range(9):
+    print()
+    for i in range(10):
         current_t = max_t + i * t_increment
+        print(f"  [{i+1}/10] Simulating  N={N},  MaxT={current_t:>8} ...", end="", flush=True)
         min_b, avg_b, max_b, _, _, _, _, _ = RunSimulation(N, current_t, animate=False)
 
         # Appends values from simulation into lists
@@ -285,9 +287,14 @@ def RunExperimentChangeMaxT():
         min_list.append(min_b)
         avg_list.append(avg_b)
         max_list.append(max_b)
+        print(f"  min={min_b}  avg={avg_b:.2f}  max={max_b}")
 
     # Plots the results
-    PlotGraph(maxt_values, min_list, avg_list, max_list)
+    PlotGraph(
+        maxt_values, min_list, avg_list, max_list,
+        x_label="Total Paint Blobs (MaxT)",
+        title=f"Paint Blob Statistics: Varying MaxT  (N={N}x{N})"
+    )
 
 
 """
@@ -323,8 +330,6 @@ Parameters:
 Returns:
     (min_blobs, avg_blobs, max_blobs)
 """
-
-
 def GetStatistics(canvas, total_blobs, N):
     # determine total blob count by square
     totals_by_square = [
@@ -369,16 +374,9 @@ def GetStatistics(canvas, total_blobs, N):
     return min_square_blobs, avg_square_blobs, max_square_blobs
 
 
-# /-- Main Driver --/
-
-#   DESCRIPTION:
-#       Main driver for SG3_Program.py
-#   GLOBALS USED:
-#       N/a
-#   PARAMETERS:
-#       N/a
-#   RETURNS:
-#       N/a
+# ---------------------------------------------------------------
+# SECTION 10 — MAIN
+# ---------------------------------------------------------------
 def main():
     # ── Program explanation ──────────────────────
     print("--------------------------------------------------------------")
@@ -419,9 +417,36 @@ Experiments:
             root1.destroy()
         except tk.TclError:
             pass  # window was already closed manually
+        
+    # ── Simulation 2: user-defined N and MaxT ───────────────
+    print("\n" + "─" * 100)
+    print("  SIMULATION 2 — Your parameters")
+    print("─" * 100)
+    print("  N must be an integer from 2 to 100.")
+    print("  MaxT must be an integer from 4 to 1,000,000.\n")
 
+    N2   = GetValidInteger("  Enter grid size N for Simulation 2", 2, 100)
+    MaxT2 = GetValidInteger("  Enter MaxT for Simulation 2",        4, 1000000)
+
+    print(f"\nStarting Simulation 2  ({N2}x{N2}, MaxT={MaxT2})...\n")
+    min_b2, avg_b2, max_b2, canvas2, full2, root2, tkc2, cells2 = \
+        RunSimulation(N2, MaxT2, animate=True)
+
+    # Explain white squares if canvas was not fully covered
+    if not full2:
+        print(f"\n  *** MaxT={MaxT2} was reached before all squares were painted.")
+        print("  *** You will see at least one white (unpainted) square in the canvas.")
+
+    if root2:
+        input("\nSimulation 2 complete. "
+              "Press ENTER to close the canvas window and continue... ")
+        try:
+            root2.destroy()
+        except tk.TclError:
+            pass
 
     # Simulation 3: change user N or MaxT for 10 simulations
+    print("\n" + "═" * 100)
     print("\nStarting Simulation 3 (change one variable...\n")
 
     print("\ta) Change N (grid grows, MaxT fixed)")
@@ -437,6 +462,11 @@ Experiments:
             break
         else:
             choice = input("Choose (a) Change N or (b) Change MaxT: ")
+
+    # ── Graceful exit ────────────────────────────────────────
+    print("\n" + "═" * 55)
+    input("  All done! Press ENTER to exit the program. ")
+    print("  Goodbye!")
 
 # main guard
 if __name__ == "__main__":
