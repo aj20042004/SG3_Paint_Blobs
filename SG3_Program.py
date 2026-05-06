@@ -36,6 +36,7 @@
 #                 graphs for the two batch experiments.
 #   random      — built-in; used to randomly select grid squares and blob colors.
 #   time        — built-in; used to pace the animation with sleep() delays.
+#   sys         — built-in; used to exit gracefully on Ctrl+C or Ctrl+D during input.
 #
 # Outside Resources:
 #    - https://docs.python.org/3/library/tkinter.html  (Canvas widget docs)
@@ -48,7 +49,77 @@ import tkinter as tk
 import random
 import time
 import matplotlib.pyplot as plt
+import sys
 
+"""
+Repeatedly prompts the user until a valid integer in [min_val, max_val]
+is entered. Prints a precise error message for each type of bad input.
+
+Global variables: none
+Parameters:
+    prompt   — string shown to the user before input
+    min_val  — int, smallest acceptable value (inclusive)
+    max_val  — int, largest acceptable value (inclusive)
+Returns:
+    A valid integer within [min_val, max_val].
+"""
+def GetValidInteger(prompt, min_val, max_val):
+ 
+    while True:
+        # Wrap input() so Ctrl+C (KeyboardInterrupt) and Ctrl+D / EOF (EOFError)
+        # produce a clean exit instead of a Python traceback.
+        try:
+            raw = input(f"{prompt} ({min_val}–{max_val}): ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\n\nInput cancelled by user. Exiting program. Goodbye!")
+            sys.exit(0)
+ 
+        # Reject empty input
+        if raw == "":
+            print(f"  Error: No input detected. Please enter a whole number "
+                  f"between {min_val} and {max_val}.")
+            continue
+        try:
+            value = int(raw)
+        except ValueError:
+            print(f"  Error: '{raw}' is not a valid integer. "
+                  f"Please enter a whole number between {min_val} and {max_val}.")
+            continue
+        if value < min_val or value > max_val:
+            print(f"  Error: {value} is out of range. "
+                  f"Please enter a value between {min_val} and {max_val}.")
+            continue
+        return value
+
+"""
+Prompts and validates an increment for MaxT or N from user.
+
+Parameters:
+    prompt        — string shown before input
+    valid_options — list of acceptable integer values, e.g. [1, 10, 100, 1000]
+Returns:
+    A valid integer from valid_options.
+"""
+def GetValidIncrement(prompt,valid_options):
+    options_str = ", ".join(str(v) for v in valid_options)
+    while True:
+        raw = input(f"{prompt} (must be one of: {options_str}): ").strip()
+        if raw == "":
+            print(f"  Error: No input detected. Choose from {options_str}.")
+            continue
+        if "." in raw:
+            print(f"  Error: '{raw}' is not a whole number. Choose from {options_str}.")
+            continue
+        try:
+            value = int(raw)
+        except ValueError:
+            print(f"  Error: '{raw}' is not a valid integer. Choose from {options_str}.")
+            continue
+        if value not in valid_options:
+            print(f"  Error: {value} is not an allowed increment. Choose from {options_str}.")
+            continue
+        return value
+    
 """
 Maps a color name to a tkinter hex color string.
 Parameters:
@@ -214,11 +285,9 @@ def RunExperimentChangeN():
     print("│  Experiment 1: Vary Grid Size N  (MaxT fixed)   │")
     print("└─────────────────────────────────────────────────┘")
     
-    N = int(input("Enter starting grid size N: "))  # temporary line until GetValidInteger is implemented
-    N_increment = GetValidIncrement("Enter valid increment (1, 10, 100, or 1000): ")
-    
-    # max_t = GetValidInteger("Enter starting MaxT: ")
-    max_t = int(input("Enter MaxT: "))  # temporary line until GetValidInteger is implemented
+    N          = GetValidInteger("Enter starting grid size N", 2, 100)
+    Nincrement = GetValidIncrement("Enter N increment", [1, 10, 100, 1000])
+    MaxT       = GetValidInteger("Enter fixed MaxT (blobs per simulation)", 4, 1000000)
 
     # Lists to store values from simulations
     N_values = []  # grid sizes (N)
@@ -229,9 +298,9 @@ def RunExperimentChangeN():
     print()
     # Runs simulations 10 times while incrementing N each time
     for i in range(10):
-        current_N = N + i * N_increment
-        print(f"  [{i+1}/10] Simulating  N={current_N:>5},  MaxT={max_t} ...", end="", flush=True)
-        min_b, avg_b, max_b, _, _, _, _, _ = RunSimulation(current_N, max_t, animate=False)
+        current_N = N + i * Nincrement
+        print(f"  [{i+1}/10] Simulating  N={current_N:>5},  MaxT={MaxT} ...", end="", flush=True)
+        min_b, avg_b, max_b, _, _, _, _, _ = RunSimulation(current_N, MaxT, animate=False)
 
         # Appends values from simulation into lists
         N_values.append(current_N)
@@ -244,7 +313,7 @@ def RunExperimentChangeN():
     PlotGraph(
         N_values, min_list, avg_list, max_list,
         x_label="Grid Dimension N (squares per side)",
-        title=f"Paint Blob Statistics: Varying N  (MaxT={max_t})"
+        title=f"Paint Blob Statistics: Varying N  (MaxT={MaxT})"
     )
 
 
@@ -261,14 +330,10 @@ def RunExperimentChangeMaxT():
     print("│  Experiment 2: Vary MaxT  (Grid Size N fixed)    │")
     print("└──────────────────────────────────────────────────┘")
     
-    # Prompts user for MaxT, increment of MaxT, & N
-    # max_t = GetValidInteger("Enter starting MaxT: ")
-    max_t = int(input("Enter starting MaxT: "))  # temporary line until GetValidInteger is implemented
-    t_increment = GetValidIncrement("Enter valid increment (1, 10, 100, or 1000): ")
+    MaxT = GetValidInteger("Enter starting MaxT", 4, 1000000)
+    Tincrement = GetValidIncrement("Enter T increment", [1, 10, 100, 1000])
+    N = GetValidInteger("Enter fixed grid size N", 2, 100)
     
-    # N = GetValidInteger("Enter grid size N: ")
-    N = int(input("Enter grid size N: "))  # temporary line until GetValidInteger is implemented
-
     # Lists to store values from simulations
     maxt_values = []  # MaxT values
     min_list = []  # minimums
@@ -278,7 +343,7 @@ def RunExperimentChangeMaxT():
     # Runs simulations 10 times while incrementing MaxT each time
     print()
     for i in range(10):
-        current_t = max_t + i * t_increment
+        current_t = MaxT + i * Tincrement
         print(f"  [{i+1}/10] Simulating  N={N},  MaxT={current_t:>8} ...", end="", flush=True)
         min_b, avg_b, max_b, _, _, _, _, _ = RunSimulation(N, current_t, animate=False)
 
@@ -295,28 +360,6 @@ def RunExperimentChangeMaxT():
         x_label="Total Paint Blobs (MaxT)",
         title=f"Paint Blob Statistics: Varying MaxT  (N={N}x{N})"
     )
-
-
-"""
-Prompts and validates an increment for MaxT or N from user.
-
-Parameter(s): 
-    user_increment
-Returns: 
-    user_increment
-"""
-def GetValidIncrement(prompt):
-    while True:  # re-prompts until valid input is submitted
-        user_input = input(prompt)
-        user_increment = int(user_input) # converts string to integer
-
-        if user_increment == 1 or user_increment == 10 or user_increment == 100 or user_increment == 1000:
-            break
-        else:
-            print("Invalid input. Your only options are 1, 10, 100, or 1000.")
-
-    return user_increment
-
 
 """
 Computes and prints canvas statistics, then returns min/avg/max.
@@ -372,49 +415,58 @@ def GetStatistics(canvas, total_blobs, N):
     print(f"  Squares with only one color      = {total_one_color}")
 
     return min_square_blobs, avg_square_blobs, max_square_blobs
+
 # ---------------------------------------------------------------
 #  GRAPHING FUNCTION — REQUIRED FOR EXPERIMENTS 1 AND 2
 # ---------------------------------------------------------------
+"""
+Draws a graph with three point series:
+    1. minimum blobs per square
+    2. average blobs per square
+    3. maximum blobs per square
+Parameters:
+    x_values — list of X‑axis values (N or MaxT depending on experiment)
+    min_list — list of minimum blob counts
+    avg_list — list of average blob counts
+    max_list — list of maximum blob counts
+    x_label  — label for the X axis
+    title    — graph title
+"""
+def PlotGraph(x_values, min_list, avg_list, max_list, x_label, title):
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-def PlotGraph(x_values, min_list, avg_list, max_list, x_label="X", title="Paint Blob Statistics"):
-    """
-    Draws a graph with three point series:
-        • minimum blobs per square
-        • average blobs per square
-        • maximum blobs per square
+    # Three visually distinct series: circles, triangles, squares
+    ax.plot(x_values, min_list, 'o-',
+            color='#2196F3', linewidth=1.8, markersize=9,
+            label='Minimum blobs on a square')
+    ax.plot(x_values, avg_list, '^-',
+            color='#FF9800', linewidth=1.8, markersize=9,
+            label='Average blobs per square')
+    ax.plot(x_values, max_list, 's-',
+            color='#F44336', linewidth=1.8, markersize=9,
+            label='Maximum blobs on a square')
 
-    Parameters:
-        x_values — list of X‑axis values (N or MaxT depending on experiment)
-        min_list — list of minimum blob counts
-        avg_list — list of average blob counts
-        max_list — list of maximum blob counts
-        x_label  — label for the X axis
-        title    — graph title
-    """
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=14)
+    ax.set_xlabel(x_label, fontsize=12)
+    ax.set_ylabel("Number of Blobs on a Square", fontsize=12)
+    ax.legend(fontsize=11, loc='best')
+    ax.grid(True, linestyle='--', alpha=0.45)
 
-    plt.figure(figsize=(10, 6))
+    # Label every data point with its value
+    for xv, yv in zip(x_values, min_list):
+        ax.annotate(f"{yv}", (xv, yv), textcoords="offset points",
+                    xytext=(0, -14), ha='center', fontsize=8, color='#2196F3')
+    for xv, yv in zip(x_values, avg_list):
+        ax.annotate(f"{yv:.1f}", (xv, yv), textcoords="offset points",
+                    xytext=(0, 7), ha='center', fontsize=8, color='#FF9800')
+    for xv, yv in zip(x_values, max_list):
+        ax.annotate(f"{yv}", (xv, yv), textcoords="offset points",
+                    xytext=(0, 7), ha='center', fontsize=8, color='#F44336')
 
-    # Plot each series with distinct markers
-    plt.plot(x_values, min_list, marker="o", linestyle="-", color="blue",  label="Minimum")
-    plt.plot(x_values, avg_list, marker="s", linestyle="-", color="green", label="Average")
-    plt.plot(x_values, max_list, marker="^", linestyle="-", color="red",   label="Maximum")
-
-    # Labels and title
-    plt.xlabel(x_label, fontsize=12)
-    plt.ylabel("Blobs per Square", fontsize=12)
-    plt.title(title, fontsize=14, fontweight="bold")
-
-    # Grid for readability
-    plt.grid(True, linestyle="--", alpha=0.5)
-
-    # Legend
-    plt.legend()
-
-    # Tight layout so labels don't get cut off
     plt.tight_layout()
-
-    # Display the graph
     plt.show()
+
 
 
 # ---------------------------------------------------------------
@@ -490,11 +542,11 @@ Experiments:
 
     # Simulation 3: change user N or MaxT for 10 simulations
     print("\n" + "═" * 100)
-    print("\nStarting Simulation 3 (change one variable...\n")
+    print("\nStarting Simulation 3 (Change one variable...)\n")
 
-    print("\ta) Change N (grid grows, MaxT fixed)")
-    print("\tb) Change MaxT (longer runs, N fixed)")
-    choice = input("\nChoose an option: ")
+    print("a) Change N (grid grows, MaxT fixed)")
+    print("b) Change MaxT (longer runs, N fixed)")
+    choice = input("\nChoose an option (a) Change N or (b) Change MaxT: ")
 
     while True:
         if choice == "a" or choice == 'A':
